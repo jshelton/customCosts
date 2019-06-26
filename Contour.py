@@ -10,7 +10,7 @@ theta_min, theta_max = 1, 30
 xmin, xmax = theta_min, theta_max
 
 # Z
-Zmin, Zmax = 1, 100
+Zmin, Zmax = 1, 30
 ymin, ymax = Zmin, Zmax
 
 
@@ -35,7 +35,7 @@ Q1 = 5
 Q2 = 5
 p1 = 2
 p2 = 3
-lambdaL = 25
+lambdaL = 40
 
 for i in range(len(Y)):
     aik[i] = (Y[i][0]**2/2)**(1/3)
