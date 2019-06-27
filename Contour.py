@@ -6,16 +6,18 @@ import numpy as np
 
 
 # Theta (X axis)
-theta_min, theta_max = 1, 30
+theta_min, theta_max = 1, 5
 Xmin, Xmax = theta_min, theta_max
 
-# Z (Y axis)
-Zmin, Zmax = 1, 30
+# Z (Y axis
+
+Zmin, Zmax = 1, 10
 Ymin, Ymax = Zmin, Zmax
 
+lambda_min, lambda_max = 20, 20  # this is a given in the book
 
 # make these smaller to increase the resolution
-dx, dy = 0.1, 0.1
+dx, dy = (Xmax-Xmin)/300, (Ymax-Ymin)/300
 
 
 # generate 2 2d grids for the X & Y bounds
@@ -24,7 +26,7 @@ Y_mat, X_mat = np.mgrid[slice(Ymin, Ymax + dy, dy),
 
 
 # c = np.sin(X)**10 + np.cos(10 + Y*X) * np.cos(X)
-c = np.zeros((len(Y_mat), len(Y_mat[0])))
+c = np.zeros((len(X_mat), len(X_mat[0])))
 
 aik_arr = np.zeros(len(Y_mat))
 
@@ -35,7 +37,6 @@ Q1 = 5
 Q2 = 5
 p1 = 2
 p2 = 3
-Lambdas = [40, 40, 40]
 # Assumes that additional products are added at the end and not in the middle
 
 for i in range(len(Y_mat)):
@@ -52,29 +53,47 @@ for i in range(len(Y_mat)):
         X = X_mat[i][j]
         Y = Y_mat[i][j]
 
-        Theta = X
+        Theta_H = X
+        xLambda = lambda_min
+        # Constant for now, needs to be changed
 
         # if ((X/5)**2 > (Y/5)**3):
         #     c[i][j] = 2
         # if (X + Y < 4):
         #     c[i][j] = 1
 
-        if (Y_mat[i][0] < theta_min*Lambdas[0]**.5):
-            c[i][j] = 1
+        # Example
+        # if (Y_mat[i][0] < theta_min*xLambda**.5):
+        #     c[i][j] = 1
 
         # Case i - two products
 
+        # This would be good for more than 2, but we just need 2
         # sum = 0
         # for k in range(2):
-        #     sum += (Lambdas[k]**.5 - Z)**2
+        #     sum += (Theta_H*xLambda**.5 - Z)**2
 
         # prodi = sum/(4*A)
+
+        prodi = ((theta_min*xLambda**.5 - Z)**2 +
+                 (Theta_H*xLambda**.5 - Z)**2) / (4*A)
+
+        # Case ii - Composite product
+        prodii = ((theta_min*lambda_min+Theta_H*lambda_max) /
+                  (lambda_min+lambda_max)**.5-Z)**2/(4*A)
+
+        # Case iii -
+        prodiii = (Theta_H*lambda_max**.5-Z)**2/(4*A)
+
+        c[i][j] = prodi
+        # c[i][j] = max(0, prodi, prodii, prodiii)
+        # c[i][j] = np.argmax([0, prodi, prodii, prodiii])
 
 
 # X and Y are bounds, so c should be the value *inside* those bounds.
 # Therefore, remove the last value from the c array.
 c = c[:-1, :-1]
-levels = MaxNLocator(nbins=15).tick_values(c.min(), c.max())
+levels = MaxNLocator(nbins=100).tick_values(c.min(), c.max())
 
 
 # pick the desired colormap, sensible levels, and define a normalization
